@@ -12,8 +12,8 @@ int win;
 
 punto getRandomPoint() {
 	punto A;
-	A.x = ((float)rand() * 10/(float)RAND_MAX) - 5;
-	A.y = ((float)rand() * 10/(float)RAND_MAX) - 5;
+	A.x = ((double)rand() * 10/(double)RAND_MAX) - 5;
+	A.y = ((double)rand() * 10/(double)RAND_MAX) - 5;
 	return A;
 }
 

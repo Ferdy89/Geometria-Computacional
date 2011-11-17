@@ -1,39 +1,33 @@
 #include <cmath>
 #include <stdlib.h>
 
-class punto {
-        public:
-        float x, y;
-};
+typedef struct {
+	double x, y;
+} punto;
 
-class vector {
-        public:
-        float x, y;
-};
+typedef struct {
+	double x, y;
+} vector;
 
-class recta {
-        public:
-        punto A;        // Punto
-        vector v;       // Vector
-};
+typedef struct {
+	punto A;
+	vector v;
+} recta;
 
-class segmento {
-        public:
-        punto A, B;
-        recta getRecta()  {
-                vector v;
-                v.x = B.x - A.x; v.y = B.y - A.y;
-                recta r;
-                r.A = A; r.v = v;
-                return r;
-        };
-};
+typedef struct {
+	punto A, B;
+} segmento;
 
-float distanceAB(punto A, punto B){
+typedef struct {
+	punto * list;
+	int size;
+} point_list;
+
+double distanceAB(punto A, punto B){
 	return sqrt(pow((B.x-A.x),2)+pow((B.y-A.y),2));
 };
 
-float signedAreaABC(punto A, punto B, punto C){
+double signedAreaABC(punto A, punto B, punto C){
 	return (((B.x-A.x)*(C.y-A.y)-((C.x-A.x)*(B.y-A.y))))/2;
 };  
 
@@ -41,7 +35,7 @@ int lineABC(punto A, punto B, punto C){
 	return !(((B.x-A.x)*(C.y-A.y)-((C.x-A.x)*(B.y-A.y))));
 }; 
 
-float distancePointLine(punto A, recta r) {
+double distancePointLine(punto A, recta r) {
 	// Primero necesitamos dos puntos de la recta
 	// Asumo que me dan la forma punto y vector
 	punto B, C;
@@ -52,10 +46,10 @@ float distancePointLine(punto A, recta r) {
 
 int pointInLineSegmentInclusion(punto A, segmento s) {
 	// Primero se comprueba el bounding box
-	float menorX = s.A.x < s.B.x ? s.A.x : s.B.x;
-	float mayorX = s.A.x > s.B.x ? s.A.x : s.B.x;
-	float menorY = s.A.y < s.B.y ? s.A.y : s.B.y;
-	float mayorY = s.A.y > s.B.y ? s.A.y : s.B.y;
+	double menorX = s.A.x < s.B.x ? s.A.x : s.B.x;
+	double mayorX = s.A.x > s.B.x ? s.A.x : s.B.x;
+	double menorY = s.A.y < s.B.y ? s.A.y : s.B.y;
+	double mayorY = s.A.y > s.B.y ? s.A.y : s.B.y;
 
 	if (menorX > A.x || mayorX < A.x || menorY > A.y || mayorY < A.y) {
 		return 0;
@@ -164,7 +158,11 @@ void sortByX(punto* S, int size) {
 	qsort(S, size, sizeof(punto), compX);
 }
 
-typedef struct node {
+/*void graham (punto* S, int size) {
+
+}*/
+
+/*typedef struct node {
 	int index;
 	struct node* next;
 	struct node* prev;
@@ -201,7 +199,7 @@ punto* quickHull (punto* S, int size) {
 
 	// Para cada arista, hallar el punto exterior más alejado
 	node_t* curr = &hull_start;
-	float distance = 0;
+	double distance = 0;
 	while (curr->next != NULL) {
 		distance = 0;
 		// Creo la arista con la que trabajar
@@ -234,4 +232,4 @@ punto* quickHull (punto* S, int size) {
 		curr->next = &nuevo;
 		curr = curr->next->next;
 	}
-}
+}*/
