@@ -1,6 +1,10 @@
 #include <cmath>
 #include <stdlib.h>
 
+/*
+* Estucturas de datos
+*/
+
 typedef struct {
 	double x, y;
 } punto;
@@ -18,10 +22,17 @@ typedef struct {
 	punto A, B;
 } segmento;
 
-typedef struct {
-	punto * list;
-	int size;
-} point_list;
+struct point_node {
+	struct point_node * ant;
+	struct point_node * sig;
+	punto p;
+};
+
+typedef struct point_node pnode;
+
+/*
+* Funciones geométricas
+*/
 
 double distanceAB(punto A, punto B){
 	return sqrt(pow((B.x-A.x),2)+pow((B.y-A.y),2));
@@ -158,78 +169,69 @@ void sortByX(punto* S, int size) {
 	qsort(S, size, sizeof(punto), compX);
 }
 
-/*void graham (punto* S, int size) {
+punto P0;
 
-}*/
-
-/*typedef struct node {
-	int index;
-	struct node* next;
-	struct node* prev;
-	int start;
-} node_t;
-
-punto* quickHull (punto* S, int size) {
-	// Estructuras de datos
-	node_t hull_start;
-	int banned[size];
-	recta arista;
-	vector arista_dir;
-
-	// Hallar puntos extremos (hull inicial)
-	int min = 0, max = 0;
-	for (int i = 1; i < size; i++) {
-		if (S[i].x < S[min].x) {
-			min = i;
-		} else if (S[i].x > S[max].x) {
-			max = i;
-		}
+int compAngle (const void * p1, const void * p2) {
+	/* MUY IMPORTANTE */
+	/* Esta funcion espera que P0 sea el punto mas bajo de todos */
+	/* De no ser asi los resultados son impredecibles */
+	if (signedAreaABC(P0, *(punto *) p1, *(punto *) p2) > 0) {
+		return -1 ;
+	} else if (signedAreaABC(P0, *(punto *) p1, *(punto *) p2) < 0){
+		return 1;
+	} else {
+		if (distanceAB(P0, *(punto *) p1) > distanceAB(P0, *(punto *) p2))
+			return 1;
+		else
+			return -1;
 	}
-	banned[min] = 1;
-	banned[max] = 1;	
+}
 
-	hull_start.index = min;
-	node_t hull_2;
-	hull_2.index = max;
-	hull_start.next = &hull_2;
-	hull_start.prev = &hull_2;
-	hull_start.start = 1;
-	hull_2.prev = &hull_start;
-	hull_2.next = &hull_start; 
+void sortByAngle (punto* S, int size, punto origin) {
+	P0 = origin;
+	qsort(S, size, sizeof(punto), compAngle);
+}
 
-	// Para cada arista, hallar el punto exterior más alejado
-	node_t* curr = &hull_start;
-	double distance = 0;
-	while (curr->next != NULL) {
-		distance = 0;
-		// Creo la arista con la que trabajar
-		arista.A = S[curr->index];
-		arista_dir.x = S[curr->next->index].x - S[curr->index].x;
-		arista_dir.y = S[curr->next->index].y - S[curr->index].y;
-		arista.v = arista_dir;
-		// Itero los puntos
-		for (int j = 0; j < size; j++) {
-			if (!banned[j]) {
-				if (signedAreaABC(S[curr->index], S[curr->next->index], S[j]) > 0) { // El punto está fuera
-					if (distancePointLine(S[j], arista) > distance) { 
-						max = j;
-						distance = distancePointLine(S[j], arista);
-					}
-				} else { // El punto puede estar dentro y ser baneado
-					if (pointInTriangle(S[j], S[curr->index], S[curr->next->index], S[curr->next->next->index])) {
-						banned[j] = 1;
-					}	
-				}
+pnode* graham (punto* S, int size) {	
+	// Buscar un punto extremo p0
+	punto p0 = lowermost (S, size);
+
+	// Ordenar la lista angularmente positivamente alrededor de p0
+	sortByAngle (S, size, p0);
+
+	pnode * head, * tail = (pnode*) calloc(1, sizeof(pnode));
+	tail->p = p0;
+	head = tail;
+
+	int lturn;
+	pnode * newp, * del;
+	// Recorrer la lista ordenada
+	for (int i = 0; i < size; i++) {
+		// Añadir el siguiente punto al convex hull
+		newp = (pnode*) calloc(1, sizeof(pnode));
+		newp->p = S[i];
+		newp->ant = tail;
+		tail->sig = newp;
+		tail = newp;	
+		
+		lturn = 0;
+		while (!lturn) {
+			// Si el giro es a la izquierda, continuar
+			if (tail->ant->ant == NULL) {
+				lturn = 1;
+			} else if (signedAreaABC(tail->ant->ant->p, tail->ant->p, tail->p) > 0) {
+				lturn = 1;
+			}
+			
+			// Si el giro es a la derecha, eliminar el punto anterior del convex hull y volver al paso anterior
+			else {
+				del = tail->ant;
+				del->ant->sig = del->sig;
+				del->sig->ant = del->ant;
+				free((void*) del); 
 			}
 		}
-		// Actualizo la lista de puntos baneados y la lista del hull
-		banned[max] = 1;
-		node_t nuevo;
-		nuevo.index = max;
-		nuevo.next = curr->next;
-		nuevo.prev = curr;
-		curr->next->prev = &nuevo;
-		curr->next = &nuevo;
-		curr = curr->next->next;
 	}
-}*/
+
+	return head;
+}

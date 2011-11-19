@@ -6,7 +6,7 @@
 
 using namespace std;
 
-#define NUM_POINTS 100
+#define NUM_POINTS 600000
 
 int win;
 
@@ -24,10 +24,7 @@ void getRandomList(int size, punto* list) {
 }
 
 void dibujaPunto(punto P) {
-	//glBegin(GL_POINTS);
 	glVertex2f(P.x, P.y);
-	//glEnd();
-	//glFlush();
 }
 
 void display() {
@@ -42,7 +39,7 @@ void display() {
 	glVertex2f(0.0,-6.0);
 	glVertex2f(0.0,6.0);
 	glEnd();
-	glPointSize(5);
+	//glPointSize(5);
 	glFlush();
 } 
 
@@ -100,6 +97,50 @@ void ejSortX() {
 	glFlush();
 }
 
+void ejSortAngle() {
+	display();
+
+	punto S[NUM_POINTS];
+        getRandomList(NUM_POINTS, S);
+	
+	// Buscar un punto extremo p0
+	punto p0 = lowermost (S, NUM_POINTS);
+
+	// Ordenar la lista angularmente positivamente alrededor de p0
+	sortByAngle (S, NUM_POINTS, p0);
+
+	glBegin(GL_LINE_STRIP);
+	for (int i = 0; i < NUM_POINTS; i++) {
+		glVertex2f(S[i].x, S[i].y);
+	}
+	glEnd();
+	glFlush();
+}
+
+void ejGraham() {
+	display();
+	
+	punto S[NUM_POINTS];
+	getRandomList(NUM_POINTS, S);
+
+	glBegin(GL_POINTS);
+        for (int i = 0; i < NUM_POINTS; i++) {
+                dibujaPunto(S[i]);
+        }
+	glEnd();
+	glFlush();
+
+	pnode* hull_head = graham(S, NUM_POINTS);
+	
+	glBegin(GL_LINE_LOOP);
+	while(hull_head != NULL) {
+		glVertex2f(hull_head->p.x, hull_head->p.y);
+		hull_head = hull_head->sig;
+	}
+	glEnd();
+	glFlush();
+}
+
 void keyb(unsigned char key, int x, int y){
 	if (key == 13) {
 		display();
@@ -111,6 +152,10 @@ void keyb(unsigned char key, int x, int y){
 		ejSortX();
 	} else if (key == 'q') {
 		glutDestroyWindow(win);
+	} else if (key == 'g') {
+		ejGraham();
+	} else if (key == 'w') {
+		ejSortAngle();
 	}
 }
 
