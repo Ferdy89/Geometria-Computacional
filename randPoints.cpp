@@ -12,11 +12,16 @@ point getRandomPoint() {
 	return A;
 }
 
-void getRandomList(int size, point* list) {
+point* getRandomList(int size) {
 	srand((unsigned)time(0));
+	point * list = (point*) malloc(size * sizeof(point));
+	if (list == NULL) {
+		exit(-1);
+	}
 	for (int i = 0; i < size; i++) {
 		list[i] = getRandomPoint();
 	}
+	return list;
 }
 
 gsl_rng* r;

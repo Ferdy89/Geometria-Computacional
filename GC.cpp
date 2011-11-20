@@ -30,8 +30,7 @@ void display() {
 void ejMinAngle() {
 	display();
 	
-	point S[NUM_POINTS];
-	getRandomList(NUM_POINTS, S);
+	point* S = getRandomList(NUM_POINTS);
 	
 	glBegin(GL_POINTS);
         for (int i = 0; i < NUM_POINTS; i++) {
@@ -68,8 +67,7 @@ void ejSignedArea() {
 void ejSortX() {
 	display();
 
-	point S[NUM_POINTS];
-        getRandomList(NUM_POINTS, S);
+        point* S = getRandomList(NUM_POINTS);
 	
 	sortByX(S, NUM_POINTS);
 
@@ -84,8 +82,7 @@ void ejSortX() {
 void ejSortAngle() {
 	display();
 
-	point S[NUM_POINTS];
-        getRandomList(NUM_POINTS, S);
+        point* S = getRandomList(NUM_POINTS);
 	
 	// Buscar un point extremo p0
 	point p0 = lowermost (S, NUM_POINTS);
