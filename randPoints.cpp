@@ -1,5 +1,5 @@
 #include <time.h>
-#include <gsl/gsl_math.h>
+//#include <gsl/gsl_math.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
@@ -13,35 +13,39 @@ point getRandomPoint() {
 }
 
 point* getRandomList(int size) {
-	srand((unsigned)time(0));
+	gsl_rng_env_setup();
+
+	gsl_rng * r = gsl_rng_alloc (gsl_rng_taus);
+	gsl_rng_set(r, (unsigned) time(NULL));	
+
 	point * list = (point*) malloc(size * sizeof(point));
 	if (list == NULL) {
 		exit(-1);
 	}
 	for (int i = 0; i < size; i++) {
-		list[i] = getRandomPoint();
+		list[i].x = gsl_rng_uniform(r) * 10 - 5;
+                list[i].y = gsl_rng_uniform(r) * 10 - 5;
 	}
 	return list;
 }
 
-gsl_rng* r;
-
-point getNormalPoint() {
-	point A;
-	A.x = gsl_ran_gaussian(r, 1);
-	A.y = gsl_ran_gaussian(r, 1);
-	return A;
-}
-
 point * getNormalList(int size) {
-	r = gsl_rng_alloc(gsl_rng_taus);
-	gsl_rng_set(r, (unsigned)time(0));
+	gsl_rng_env_setup();
+
+	gsl_rng * r = gsl_rng_alloc (gsl_rng_taus);
+	gsl_rng_set(r, (unsigned) time(NULL));
+
 	point * list = (point*) malloc(size * sizeof(point));
 	if (list == NULL) {
 		exit(-1);
 	}
+
 	for (int i = 0; i < size; i++) {
-		list[i] = getNormalPoint();
+		list[i].x = gsl_ran_gaussian(r, 1);
+		list[i].y = gsl_ran_gaussian(r, 1);
 	}
+
+	gsl_rng_free (r);
+	
 	return list;
 }
