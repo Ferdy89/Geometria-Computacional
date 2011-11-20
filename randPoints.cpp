@@ -3,7 +3,7 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
-#define NUM_POINTS 100000
+#define NUM_POINTS 1000000
 
 point getRandomPoint() {
 	point A;
@@ -28,10 +28,15 @@ point getNormalPoint() {
 	return A;
 }
 
-void getNormalList(int size, point* list) {
+point * getNormalList(int size) {
 	r = gsl_rng_alloc(gsl_rng_taus);
 	gsl_rng_set(r, (unsigned)time(0));
+	point * list = (point*) malloc(size * sizeof(point));
+	if (list == NULL) {
+		exit(-1);
+	}
 	for (int i = 0; i < size; i++) {
 		list[i] = getNormalPoint();
 	}
+	return list;
 }

@@ -104,8 +104,8 @@ void ejSortAngle() {
 void ejGraham() {
 	display();
 	
-	point S[NUM_POINTS];
-	getNormalList(NUM_POINTS, S);
+	//point S[NUM_POINTS];
+	point* S = getNormalList(NUM_POINTS);
 
 	glBegin(GL_POINTS);
 	for (int i = 0; i < NUM_POINTS; i++) {
