@@ -1,4 +1,19 @@
 Librería de funciones y pruebas para la asignatura de Geometría Computacional
-Asignatura opcional de cuarto curso del plan 96
+Asignatura opcional de cuarto curso del pl an 96
 Facultad de Informática de la UPM
 Impartida por Manuel Abellanas
+
+=============================================================================
+Modo de uso:
+Tecla ENTER:	Resetea el display
+Tecla q:	Sale de la aplicación
+Tecla a:	Calcula el área signada de 3 puntos en orden RGB (imprime por la salida estándar)
+Tecla s:	Une los puntos ordenados por su coordenada x
+Tecla n:	Traza una recta entre el origen y el punto de menor ángulo positivo con el vector (1, 0)
+Tecla w:	Une los puntos ordenados angularmente alrededor del punto de menor coordenada y
+Tecla g:	Calcula y dibuja el cierre convexo con el scan de Graham
+
+=============================================================================
+Requisitos de compilación:
++ Librería GLUT
++ Libreria GSL
