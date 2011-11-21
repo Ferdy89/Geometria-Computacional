@@ -1,11 +1,14 @@
 #include <iostream>
 #include <GL/glut.h>
-#include "func_GC.cpp"
+#include "libGC.cpp"
 #include "randPoints.cpp"
+#include "DCEL.cpp"
+#include "defines.cpp"
 
 using namespace std;
 
 int win;
+int showp = 1;
 
 void dibujaPunto(point P) {
 	glVertex2f(P.x, P.y);
@@ -23,7 +26,7 @@ void display() {
 	glVertex2f(0.0,-6.0);
 	glVertex2f(0.0,6.0);
 	glEnd();
-	//glPointSize(5);
+	glPointSize(POINT_WIDTH);
 	glFlush();
 } 
 
@@ -32,16 +35,17 @@ void ejMinAngle() {
 	
 	point* S = getRandomList(NUM_POINTS);
 	
-	glBegin(GL_POINTS);
-        for (int i = 0; i < NUM_POINTS; i++) {
-                dibujaPunto(S[i]);
-        }
-	glEnd();
-	glFlush();
+	if (showp) {
+		glBegin(GL_POINTS);
+		for (int i = 0; i < NUM_POINTS; i++) {
+			dibujaPunto(S[i]);
+		}
+		glEnd();
+		glFlush();
+	}
 
 	glColor3f(0.0,1.0,0.0);
 	point res = minAngle(S, NUM_POINTS);
-	cout << "Punto [" << res.x << ", " << res.y << "]" << endl;
 	glBegin(GL_LINE);
 	glVertex2f(0, 0);
 	glVertex2f(res.x * 10, res.y * 10);
@@ -101,15 +105,16 @@ void ejSortAngle() {
 void ejGraham() {
 	display();
 	
-	//point S[NUM_POINTS];
 	point* S = getNormalList(NUM_POINTS);
 
-	glBegin(GL_POINTS);
-	for (int i = 0; i < NUM_POINTS; i++) {
-		dibujaPunto(S[i]);
+	if (showp) {
+		glBegin(GL_POINTS);
+		for (int i = 0; i < NUM_POINTS; i++) {
+			dibujaPunto(S[i]);
+		}
+		glEnd();
+		glFlush();
 	}
-	glEnd();
-	glFlush();
 
 	pnode* hull_head = graham(S, NUM_POINTS);
 
@@ -137,6 +142,8 @@ void keyb(unsigned char key, int x, int y){
 		ejGraham();
 	} else if (key == 'w') {
 		ejSortAngle();
+	} else if (key == 'p') {
+		showp = !showp;
 	}
 }
 

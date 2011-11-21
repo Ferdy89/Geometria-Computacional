@@ -1,6 +1,4 @@
-#include <iostream>
 #include <cmath>
-#include <stdlib.h>
 
 using namespace std;
 
@@ -204,7 +202,6 @@ pnode* graham (point* S, int size) {
 
 	pnode * head, * tail = (pnode*) calloc(1, sizeof(pnode));
 	if (tail == NULL) {
-		cerr << "Sin memoria" << endl;
 		exit(-1);
 	}
 	tail->p = p0;
@@ -217,7 +214,6 @@ pnode* graham (point* S, int size) {
 		// Añadir el siguiente point al convex hull
 		newp = (pnode*) calloc(1, sizeof(pnode));
 		if (newp == NULL) {
-			cerr << "Sin memoria" << endl;
 			exit(-1);
 		}
 		newp->p = S[i];

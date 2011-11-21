@@ -1,9 +1,6 @@
 #include <time.h>
-//#include <gsl/gsl_math.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-
-#define NUM_POINTS 1000000
 
 point getRandomPoint() {
 	point A;

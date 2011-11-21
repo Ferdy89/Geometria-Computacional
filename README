@@ -7,6 +7,9 @@ Impartida por Manuel Abellanas
 Modo de uso:
 Tecla ENTER:	Resetea el display
 Tecla q:	Sale de la aplicación
+Tecla p:	Activa o desactiva el dibujado de los puntos que no forman parte de la solución
+
+Tests:
 Tecla a:	Calcula el área signada de 3 puntos en orden RGB (imprime por la salida estándar)
 Tecla s:	Une los puntos ordenados por su coordenada x
 Tecla n:	Traza una recta entre el origen y el punto de menor ángulo positivo con el vector (1, 0)
