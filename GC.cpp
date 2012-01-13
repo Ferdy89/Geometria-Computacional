@@ -2,13 +2,19 @@
 #include <GL/glut.h>
 #include "libGC.cpp"
 #include "randPoints.cpp"
-#include "DCEL.cpp"
+
+#ifndef DCEL_FUNC
+	#include "DCEL.cpp"
+#endif
+
 #include "defines.cpp"
+#include <time.h>
 
 using namespace std;
 
 int win;
 int showp = 1;
+clock_t start, end;
 
 void dibujaPunto(point P) {
 	glVertex2f(P.x, P.y);
@@ -127,6 +133,60 @@ void ejGraham() {
 	glFlush();
 }
 
+DCEL * D;
+
+void drawDCEL(DCEL * d) {
+	display();
+
+	for (int i = 0; i < d->esize; i++) {
+		glBegin(GL_LINE);
+		glVertex2f(d->ledge[i].origin->x, d->ledge[i].origin->y);
+		glVertex2f(d->ledge[i].next->origin->x, d->ledge[i].next->origin->y);
+		glEnd();
+	}
+	glFlush();
+}
+
+void ejDCEL() {
+	start = clock();
+	point* S = getRandomList(NUM_POINTS);
+	end = clock();
+	cout << "Getting " << NUM_POINTS << " random points... " << (double)(end-start)/CLOCKS_PER_SEC << " seconds" << endl;
+
+	start = clock();
+	D = triangulate(S, NUM_POINTS);
+	end = clock();
+	cout << "Triangulating " << NUM_POINTS << " points... " << (double)(end-start)/CLOCKS_PER_SEC << " seconds" << endl;
+
+	drawDCEL(D);
+	// printDCEL(D);
+}
+
+void ejCentre() {
+	display();
+	point * S = getRandomList(3);
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(S[0].x, S[0].y);
+	glVertex2f(S[1].x, S[1].y);
+	glVertex2f(S[2].x, S[2].y);
+	glEnd();
+	DCEL * D = triangulate(S, 3);
+	point res = circumcentre(&(D->lvertex[0]), &(D->lvertex[1]), &(D->lvertex[2]));
+	glBegin(GL_POINT);
+	glVertex2f(res.x, res.y);
+	glEnd();
+	glFlush();
+}
+
+void ejDelaunay() {
+	start = clock();
+	Delaunay(D);
+	end = clock();
+	cout << "Getting Delaunay from " << NUM_POINTS << " points... " << (double)(end-start)/CLOCKS_PER_SEC << " seconds" << endl;
+
+	drawDCEL(D);
+}
+
 void keyb(unsigned char key, int x, int y){
 	if (key == 13) {
 		display();
@@ -143,9 +203,16 @@ void keyb(unsigned char key, int x, int y){
 	} else if (key == 'w') {
 		ejSortAngle();
 	} else if (key == 'p') {
-		showp = !showp;
-	}
-}
+		//showp = !showp;
+		if (D != NULL)
+			printDCEL(D);
+	} else if (key == 'd') {
+		ejDCEL();
+	} else if (key == 'c') {
+		ejCentre();
+	} else if (key == 'y') {
+		ejDelaunay();
+	}}
 
 int main(int argc, char **argv) {
 	glutInit(&argc,argv);

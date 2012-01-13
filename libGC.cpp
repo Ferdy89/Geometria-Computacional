@@ -1,35 +1,15 @@
 #include <cmath>
+#define GC_TOOLS
+
+#ifndef STRUCTS_GC
+	#include "libGC.h"
+#endif
+
+#ifndef DCEL_FUNC
+	#include "DCEL.cpp"
+#endif
 
 using namespace std;
-
-/*
-* Estucturas de datos
-*/
-
-typedef struct {
-	double x, y;
-} point;
-
-typedef struct {
-	double x, y;
-} vector;
-
-typedef struct {
-	point A;
-	vector v;
-} line;
-
-typedef struct {
-	point A, B;
-} segmento;
-
-struct point_node {
-	struct point_node * ant;
-	struct point_node * sig;
-	point p;
-};
-
-typedef struct point_node pnode;
 
 /*
 * Funciones geométricas
@@ -41,7 +21,11 @@ double dist(point A, point B){
 
 double area(point A, point B, point C){
 	return (((B.x-A.x)*(C.y-A.y)-((C.x-A.x)*(B.y-A.y))))/2;
-};  
+};
+
+double sign(struct vertex * A, struct vertex * B, struct vertex * C) {
+	return (B->x-A->x)*(C->y-A->y)-((C->x-A->x)*(B->y-A->y));
+}  
 
 int lined(point A, point B, point C){
 	return !(((B.x-A.x)*(C.y-A.y)-((C.x-A.x)*(B.y-A.y))));
@@ -193,6 +177,8 @@ void sortByAngle (point* S, int size, point origin) {
 	qsort(S, size, sizeof(point), compAngle);
 }
 
+// Sólo devuelve una lista enlazada con el cierre convexo
+// No construye un DCEL
 pnode* graham (point* S, int size) {	
 	// Buscar un point extremo p0
 	point p0 = lowermost (S, size);
@@ -210,7 +196,7 @@ pnode* graham (point* S, int size) {
 	int lturn;
 	pnode * newp, * del;
 	// Recorrer la lista ordenada
-	for (int i = 0; i < size; i++) {
+	for (int i = 1; i < size; i++) {
 		// Añadir el siguiente point al convex hull
 		newp = (pnode*) calloc(1, sizeof(pnode));
 		if (newp == NULL) {
@@ -241,4 +227,62 @@ pnode* graham (point* S, int size) {
 	}
 
 	return head;
+}
+
+DCEL * triangulate (point* S, int size) {	
+	// Mismo patrón que con el scan de Graham
+	point p0 = lowermost (S, size);
+	sortByAngle (S, size, p0);
+
+	DCEL * triang = createDCEL(size, &(S[0]), &(S[1]));
+	struct edge * last = &(triang->ledge[0]);
+	// Recorrer la lista ordenada
+	for (int i = 2; i < size; i++) {
+		// Añadir el siguiente point a la triangulación
+		addVertex(triang, &(S[i]), last->next);
+		last = addEdge(triang, last->next->next, last);
+		
+		while (sign(last->next->next->next->origin, last->next->next->origin, last->next->origin) < 0) {
+			addEdge(triang, last->next->next->next, last->next);
+		}
+	}
+	return triang;
+}
+
+// Lo que me costó hacer esta función y que ahora no sirva para nada...
+point circumcentre (struct vertex * A, struct vertex * B, struct vertex * C) {
+	point res;
+	res.x = ((pow(C->x, 2)-pow(B->x, 2)+pow(C->y, 2)-pow(B->y, 2))*(B->y-A->y)-(pow(B->x, 2)-pow(A->x, 2)+pow(B->y, 2)-pow(A->y, 2))*(C->y-B->y))/(2*((A->x-B->x)*(C->y-B->y)-(B->x-C->x)*(B->y-A->y)));
+	res.y = (2*res.x*(B->x-C->x)+pow(C->x, 2)-pow(B->x, 2)+pow(C->y, 2)-pow(B->y, 2))/(2*(C->y-B->y));
+	return res;
+}
+
+int illegal (struct edge * e) {
+	struct vertex * a, * b, * c, * d;
+	a = e->next->origin;
+	b = e->prev->origin;
+	c = e->origin;
+	d = e->twin->prev->origin;
+	return ((a->x-d->x)*(b->y-d->y)*(pow(c->x-d->x, 2)+pow(c->y-d->y, 2))) + ((a->y-d->y)*(pow(b->x-d->x, 2)+pow(b->y-d->y, 2))*(c->x-d->x)) + ((b->x-d->x)*(c->y-d->y)*(pow(a->x-d->x, 2)+pow(a->y-d->y, 2))) - ((pow(a->x-d->x, 2)+pow(a->y-d->y, 2))*(b->y-d->y)*(c->x-d->x)) - ((a->y-d->y)*(b->x-d->x)*(pow(c->x-d->x, 2)+pow(c->y-d->y, 2))) - ((pow(b->x-d->x, 2)+pow(b->y-d->y, 2))*(c->y-d->y)*(a->x-d->x)) > 0;
+}
+
+void Delaunay(DCEL * D) {
+	int flipped = 1;
+	while (flipped) {
+		flipped = 0;
+		for (int i = 0; i < D->esize; i = i + 2){
+			// Comprobar que la arista no sea del cierre convexo
+			if (D->ledge[i].eface == D->lface || D->ledge[i].twin->eface == D->lface) {
+				continue;
+			}
+			// Comprobar que el cuadrilatero sea convexo
+			if (sign(D->ledge[i].prev->origin, D->ledge[i].origin, D->ledge[i].twin->prev->origin) < 0 || sign(D->ledge[i].twin->prev->origin, D->ledge[i].next->origin, D->ledge[i].prev->origin) < 0) {
+				continue;
+			}
+			if (illegal(&(D->ledge[i]))) {
+				flip(&(D->ledge[i]));
+				flipped = 1;
+			}
+		}
+	}
 }

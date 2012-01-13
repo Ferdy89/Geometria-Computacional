@@ -1,2 +1,2 @@
-#define NUM_POINTS 1000000
+#define NUM_POINTS 100
 #define POINT_WIDTH 1
